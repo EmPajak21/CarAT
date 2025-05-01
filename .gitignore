@@ -1,0 +1,13 @@
+__pycache__/
+carat.egg-info/
+ep/
+.vscode/
+
+# ignore data folder…
+data/*
+carat/vis/sankey.py
+
+# except for these files:
+!data/graph.pkl
+!data/tdi_anon_dict_new.pkl
+carat/build/lib/vis/sankey.py
