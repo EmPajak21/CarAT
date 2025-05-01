@@ -39,7 +39,7 @@ def contains_carbon(smiles):
     if pd.isna(smiles):
         return False
     else:
-        return bool(re.search(r"\bC\b|C[^1]", smiles))
+        return bool(re.search(r"\bC(?!l)\b|C[^l1]", smiles))
 
 
 def update_smiles(row):
