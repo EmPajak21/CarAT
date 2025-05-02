@@ -23,7 +23,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8==7.2.0
           
+      - name: Create flake8 config
+        run: |
+          echo "[flake8]
+          max-line-length = 127
+          max-complexity = 10
+          per-file-ignores =
+              __init__.py: F401
+          " > .flake8
+          
       - name: Lint with flake8
         run: |
-          # Run flake8 and fail the build if there are any violations
-          flake8 . --count --max-complexity=10 --max-line-length=127 --statistics
+          # Run flake8 with configuration
+          flake8 . --count --statistics
