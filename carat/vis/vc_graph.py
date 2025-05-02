@@ -55,7 +55,7 @@ def mm(
 
     Args:
         graph: The Mermaid diagram code as a string
-        output_filename: Filename to save the rendered diagram (default: 'mermaid_diagram.png')
+        output_filename: Filename to save diagram (default: 'mermaid_diagram.png')
         figsize: Figure size as (width, height) in inches (default: (12, 10))
         dpi: Resolution of the output image (default: 300)
 
