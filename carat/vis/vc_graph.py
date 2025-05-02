@@ -31,7 +31,7 @@ def nx_to_mermaid(G: nx.Graph) -> str:
     # Add nodes to the graph definition
     for node, data in G.nodes(data=True):
         node_text = data.get(
-            "txt", "tr"
+            "label", "tr"
         )  # Default to node ID if 'txt' is not available
         if node in duplets:
             mermaid += f"    {node}([{node_text}\n{node}])\n"
