@@ -26,7 +26,7 @@ jobs:
       - name: Create flake8 config
         run: |
           echo "[flake8]
-          max-line-length = 127
+          max-line-length = 88
           max-complexity = 10
           per-file-ignores =
               __init__.py: F401

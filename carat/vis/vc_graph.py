@@ -1,7 +1,6 @@
 import networkx as nx
 import base64
 import io
-import re
 import requests
 from typing import Tuple, Optional
 from IPython.display import Image, display

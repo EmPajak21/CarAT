@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Set, Tuple, Any
+from typing import Dict, Set, Tuple, Any
 from mip import Model, xsum, minimize, CBC
 from carat.utils import process_results, save_results
 
