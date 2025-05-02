@@ -132,7 +132,7 @@ class SankeyDiagramGenerator:
         ).agg(
             {
                 "ratio": "sum",
-                "biogenic content": "first",  # Take first value of biogenic content for each substream
+                "biogenic content": "first",
             }
         )
 
@@ -253,7 +253,8 @@ class SankeyDiagramGenerator:
             if opacity == 0:
                 color = "rgba(128, 128, 128, 0.8)"  # Grey with fixed opacity
             else:
-                color = f"rgba(144, 238, 144, {opacity**3 + 0.1:.2f})"  # Light green with calculated opacity
+                # Light green with calculated opacity
+                color = f"rgba(144, 238, 144, {opacity**3 + 0.1:.2f})"
 
             # Skip links involving nodes with 'N/A' text
             if (

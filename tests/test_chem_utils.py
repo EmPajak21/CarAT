@@ -1,6 +1,12 @@
-import pytest
-from chem_utils import canonical_smiles, unmap_smiles, smiles2molecule, molecule2smiles, contains_carbon
+from chem_utils import (
+    canonical_smiles,
+    unmap_smiles,
+    smiles2molecule,
+    molecule2smiles,
+    contains_carbon,
+)
 from rdkit import Chem
+
 
 def test_canonical_smiles():
     # Valid SMILES
@@ -12,6 +18,7 @@ def test_canonical_smiles():
 
     # None input
     assert canonical_smiles(None) is None
+
 
 def test_unmap_smiles():
     # SMILES with atom-map numbers
@@ -26,6 +33,7 @@ def test_unmap_smiles():
     # None input
     assert unmap_smiles(None) is None
 
+
 def test_smiles2molecule_and_molecule2smiles():
     # Valid SMILES
     smi = "CCO"
@@ -37,6 +45,7 @@ def test_smiles2molecule_and_molecule2smiles():
     assert smiles2molecule("invalid") is None
     assert molecule2smiles(None) is None
 
+
 def test_contains_carbon():
     # SMILES with carbon
     assert contains_carbon("CCO") is True
@@ -46,4 +55,4 @@ def test_contains_carbon():
 
     # None or NaN input
     assert contains_carbon(None) is False
-    assert contains_carbon(float('nan')) is False
+    assert contains_carbon(float("nan")) is False

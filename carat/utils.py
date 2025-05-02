@@ -2,7 +2,6 @@ import pickle
 import ast
 import pandas as pd
 from typing import Dict, Any
-import ast
 
 
 def get_example_data(file_path="data/tdi_anon.pkl"):
