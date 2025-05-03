@@ -23,7 +23,6 @@ pip-chill==1.0.3
 plotly==6.0.1
 pre-commit==4.2.0
 protobuf==5.29.3
-pycairo==1.23.0
 pypickle==1.1.5
 pysocks==1.7.1
 pytest==8.3.5
