@@ -1,6 +1,8 @@
 import logging
-from typing import Dict, Set, Tuple, Any
-from mip import Model, xsum, minimize, CBC
+from typing import Any, Dict, Set, Tuple
+
+from mip import CBC, minimize, Model, xsum
+
 from carat.utils import process_results, save_results
 
 # Configure logger
@@ -21,15 +23,13 @@ class LPFormulator:
         # Initialize model
         self.model = Model(solver_name=CBC)
 
-        # Define sets and variables
+        # Define attribute set A, element e to be traced (carbon)
         self.A, self.e = self._define_sets()
+
+        # Instantiate model decision variables
         self.decision_vars = self._define_decision_vars()
 
-        # Initialize results containers
-        self.beta_t_res = None
-        self.beta_d_res = None
-        self.z_t_res = None
-        self.z_d_res = None
+        # Store inlet conditions
         self.inlets = inlets
 
     def _define_sets(self) -> Tuple[Set[str], str]:
@@ -94,37 +94,19 @@ class LPFormulator:
         self.model.optimize()
 
         if output_results:
-            results = process_results(self.model, self.txt_dict)
-            self.beta_t_res = results["beta_t_res"]
-            self.beta_d_res = results["beta_d_res"]
-            self.z_t_res = results["z_t_res"]
-            self.z_d_res = results["z_d_res"]
-
-            logger.info("Beta_d:\n%s", self.beta_d_res)
-            logger.info("Beta_t:\n%s", self.beta_t_res)
-            logger.info("z_d:\n%s", self.z_d_res)
-            logger.info("z_t:\n%s", self.z_t_res)
+            results = process_results(self.model)
+            logger.info("Beta_d:\n%s", results["beta_d_res"])
+            logger.info("Beta_t:\n%s", results["beta_t_res"])
+            logger.info("z_d:\n%s", results["z_d_res"])
+            logger.info("z_t:\n%s", results["z_t_res"])
 
         if pkl_output_path:
             save_results(
-                {
-                    "beta_t_res": self.beta_t_res,
-                    "beta_d_res": self.beta_d_res,
-                    "z_t_res": self.z_t_res,
-                    "z_d_res": self.z_d_res,
-                    "txt_dict": self.txt_dict,
-                    "encoder": self.encoder,
-                },
+                results,
                 pkl_output_path,
             )
 
-        return {
-            "beta_t_res": self.beta_t_res,
-            "beta_d_res": self.beta_d_res,
-            "z_t_res": self.z_t_res,
-            "z_d_res": self.z_d_res,
-            "txt_dict": self.txt_dict,
-        }
+        return results
 
     def _set_inlet_conditions(self):
         """Set the inlet conditions based on selected inlet type."""
