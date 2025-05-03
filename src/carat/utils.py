@@ -57,7 +57,7 @@ def extract_variable_values(var_prefix, model):
     Returns
     -------
     List[Dict[Tuple, float]]
-        List of dictionaries, each mapping a parsed tuple (derived from the variable name)
+        List of dictionaries, each mapping a parsed tuple (derived from var name)
         to its corresponding value.
     """
     res_holder = []
