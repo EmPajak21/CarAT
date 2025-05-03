@@ -12,9 +12,9 @@ here = Path(__file__).parent
 install_requires = here.joinpath("requirements.txt").read_text().splitlines()
 
 setup(
-    name="carat",
+    name="my-carat",
     version="0.1.0",
     package_dir={"": "src"},
-    packages=find_packages(where="src"),
+    packages=["carat"] + [f"carat.{pkg}" for pkg in find_packages(where="src/carat")],
     install_requires=install_requires,
 )
