@@ -1,7 +1,8 @@
 """Data preprocessing utilities for CarAT.
 
 Main class:
-- DataPreprocessor: transform raw value-chain configurations into structured data for LP formulation.
+- DataPreprocessor: transform raw value-chain configurations into 
+structured data for LP formulation.
 """
 
 from typing import Dict, Set, Tuple
