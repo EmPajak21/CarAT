@@ -24,7 +24,26 @@ jobs:
           pip install -r requirements.txt
 
       - name: Fix SciPy compatibility
-        run: python -c "import scipy, scipy.signal; scipy.hanning = scipy.signal.windows.hanning"
+        run: |
+          python -c "
+          import scipy
+          try:
+              from scipy.signal.windows import hann
+              scipy.hanning = hann
+              print('Fixed: Added scipy.hanning from windows.hann')
+          except (ImportError, AttributeError):
+              try:
+                  from scipy.signal import hann
+                  scipy.hanning = hann
+                  print('Fixed: Added scipy.hanning from signal.hann')
+              except (ImportError, AttributeError):
+                  try:
+                      from scipy.signal import hanning
+                      scipy.hanning = hanning
+                      print('Fixed: Used existing hanning')
+                  except (ImportError, AttributeError):
+                      print('WARNING: Could not fix scipy.hanning')
+          "
 
       - name: Run tests
         run: |
