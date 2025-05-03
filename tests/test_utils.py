@@ -6,7 +6,7 @@ constructs the “nodes” set from the union of `duplets` and `triplets`.
 
 import pickle
 
-from utils import get_example_data
+from carat.utils import get_example_data
 
 
 # Test for get_example_data
