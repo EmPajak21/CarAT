@@ -23,6 +23,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Fix SciPy compatibility
+        run: python -c "import scipy, scipy.signal; scipy.hanning = scipy.signal.windows.hanning"
+
       - name: Run tests
         run: |
           pytest tests/ --maxfail=5 --disable-warnings
