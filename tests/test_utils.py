@@ -1,5 +1,12 @@
-from utils import get_example_data
+"""Unit tests for `get_example_data` in the `utils` module.
+
+Verifies that `get_example_data` correctly loads a pickle and
+constructs the “nodes” set from the union of `duplets` and `triplets`.
+"""
+
 import pickle
+
+from utils import get_example_data
 
 
 # Test for get_example_data

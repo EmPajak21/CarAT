@@ -1,3 +1,11 @@
+"""Formulates and solves an LP for biogenic carbon content calculation.
+
+This module takes the output of a DataPreprocessor (a preprocessed value
+chain) and builds a Linear Program model (via Python-MIP/CBC) to trace
+and optimize the share of biogenic vs. fossil carbon throughout the network.
+Results can be processed and serialized via carat.utils.
+"""
+
 import logging
 from typing import Any, Dict, Set, Tuple
 
@@ -11,79 +19,42 @@ logging.basicConfig(level=logging.INFO)
 
 
 class LPFormulator:
-    """Formulate and solve linear programming optimization for value chain analysis."""
+    """Formulate and solve linear programming optimization for value chain analysis.
+
+    Parameters
+    ----------
+    preprocessed_data : Dict[str, Any]
+        Preprocessed data from the DataPreprocessor.
+    inlets : str, optional
+        Inlet conditions to use, by default "base_case_example".
+    """
 
     def __init__(
         self, preprocessed_data: Dict[str, Any], inlets: str = "base_case_example"
     ):
-        # Load data from preprocessor
         for key, value in vars(preprocessed_data).items():
             setattr(self, key, value)
 
-        # Initialize model
         self.model = Model(solver_name=CBC)
-
-        # Define attribute set A, element e to be traced (carbon)
         self.A, self.e = self._define_sets()
-
-        # Instantiate model decision variables
         self.decision_vars = self._define_decision_vars()
-
-        # Store inlet conditions
         self.inlets = inlets
 
-    def _define_sets(self) -> Tuple[Set[str], str]:
-        """Define key sets for the LP formulation."""
-        A = {"biogenic", "fossil"}
-        e = "C"
-        return A, e
-
-    def _define_decision_vars(self) -> Dict[str, Dict]:
-        """Define all decision variables for the LP model."""
-        beta_d: Dict = {}
-        z_d_pos: Dict = {}
-        z_d_neg: Dict = {}
-
-        # Duplet variables
-        for c, p, s in self.cps_tank:
-            z_d_pos[c, p, s, self.e] = self.model.add_var(
-                name=f"z_d_pos:{c, p, s, self.e}", lb=0, ub=1
-            )
-            z_d_neg[c, p, s, self.e] = self.model.add_var(
-                name=f"z_d_neg:{c, p, s, self.e}", lb=-1, ub=0
-            )
-            for a in self.A:
-                beta_d[c, p, s, self.e, a] = self.model.add_var(
-                    name=f"beta_d:{c, p, s, self.e, a}", lb=0, ub=1
-                )
-
-        # Triplet variables
-        beta_t: Dict = {}
-        z_t_pos: Dict = {}
-        z_t_neg: Dict = {}
-        for c, b, g, p, s in self.trip_out:
-            z_t_pos[c, b, g, p, s, self.e] = self.model.add_var(
-                name=f"z_t_pos:{c, b, g, p, s, self.e}", lb=0, ub=1
-            )
-            z_t_neg[c, b, g, p, s, self.e] = self.model.add_var(
-                name=f"z_t_neg:{c, b, g, p, s, self.e}", lb=-1, ub=0
-            )
-            for a in self.A:
-                beta_t[c, b, g, p, s, self.e, a] = self.model.add_var(
-                    name=f"beta_t:{c, b, g, p, s, self.e, a}", lb=0, ub=1
-                )
-
-        return {
-            "beta_d": beta_d,
-            "z_d_pos": z_d_pos,
-            "z_d_neg": z_d_neg,
-            "beta_t": beta_t,
-            "z_t_pos": z_t_pos,
-            "z_t_neg": z_t_neg,
-        }
-
     def solve(self, output_results: bool = True, pkl_output_path: str = "") -> Dict:
-        """Construct and solve the LP optimization problem."""
+        """Construct and solve the LP optimization problem.
+
+        Parameters
+        ----------
+        output_results : bool, optional
+            Whether to output results to the logger, by default True.
+        pkl_output_path : str, optional
+            Path to save results as a pickle file, by default "".
+
+        Returns
+        -------
+        Dict
+            Results of the optimization.
+        """
         self._set_inlet_conditions()
         self._add_attribute_sum_constraints()
         self._add_triplet_beta_constraints()
@@ -108,8 +79,76 @@ class LPFormulator:
 
         return results
 
+    def _define_sets(self) -> Tuple[Set[str], str]:
+        """Define key sets for the LP formulation.
+
+        Returns
+        -------
+        Tuple[Set[str], str]
+            A set of attributes and the element to be traced.
+        """
+        A = {"biogenic", "fossil"}
+        e = "C"
+        return A, e
+
+    def _define_decision_vars(self) -> Dict[str, Dict]:
+        """Define all decision variables for the LP model.
+
+        Returns
+        -------
+        Dict[str, Dict]
+            Dictionary containing decision variables for duplets and triplets.
+        """
+        beta_d = {}
+        z_d_pos = {}
+        z_d_neg = {}
+
+        for c, p, s in self.cps_tank:
+            z_d_pos[c, p, s, self.e] = self.model.add_var(
+                name=f"z_d_pos:{c, p, s, self.e}", lb=0, ub=1
+            )
+            z_d_neg[c, p, s, self.e] = self.model.add_var(
+                name=f"z_d_neg:{c, p, s, self.e}", lb=-1, ub=0
+            )
+            for a in self.A:
+                beta_d[c, p, s, self.e, a] = self.model.add_var(
+                    name=f"beta_d:{c, p, s, self.e, a}", lb=0, ub=1
+                )
+
+        beta_t = {}
+        z_t_pos = {}
+        z_t_neg = {}
+        for c, b, g, p, s in self.trip_out:
+            z_t_pos[c, b, g, p, s, self.e] = self.model.add_var(
+                name=f"z_t_pos:{c, b, g, p, s, self.e}", lb=0, ub=1
+            )
+            z_t_neg[c, b, g, p, s, self.e] = self.model.add_var(
+                name=f"z_t_neg:{c, b, g, p, s, self.e}", lb=-1, ub=0
+            )
+            for a in self.A:
+                beta_t[c, b, g, p, s, self.e, a] = self.model.add_var(
+                    name=f"beta_t:{c, b, g, p, s, self.e, a}", lb=0, ub=1
+                )
+
+        return {
+            "beta_d": beta_d,
+            "z_d_pos": z_d_pos,
+            "z_d_neg": z_d_neg,
+            "beta_t": beta_t,
+            "z_t_pos": z_t_pos,
+            "z_t_neg": z_t_neg,
+        }
+
     def _set_inlet_conditions(self):
-        """Set the inlet conditions based on selected inlet type."""
+        """
+        Set inlet conditions based on the selected inlet type.
+
+        - If `self.inlets` is `"base_case_example"`, all inlet duplets are forced to
+        fossil = 1 and biogenic = 0.
+        - If `self.inlets` is `"C1"`, the specified inlet node (`("COMP_2", "PROD_12")`)
+        is switched to biogenic = 1 (and fossil = 0), while all other inlet duplets
+        remain fossil = 1 and biogenic = 0.
+        """
         beta_d = self.decision_vars["beta_d"]
 
         if self.inlets == "base_case_example":
@@ -131,7 +170,12 @@ class LPFormulator:
                         self.model += beta_d[c, p, s, e, "biogenic"] == 0
 
     def _add_attribute_sum_constraints(self):
-        """Add constraints ensuring attribute shares sum to 1."""
+        """
+        Add constraints ensuring attribute shares sum to 1.
+
+        For each triplet (beta_t) and each duplet (beta_d), enforce that the
+        sum of the attribute‐share variables minus their slack variables equals 1.
+        """
         beta_d = self.decision_vars["beta_d"]
         z_d_pos = self.decision_vars["z_d_pos"]
         z_d_neg = self.decision_vars["z_d_neg"]
@@ -139,7 +183,6 @@ class LPFormulator:
         z_t_pos = self.decision_vars["z_t_pos"]
         z_t_neg = self.decision_vars["z_t_neg"]
 
-        # Triplet constraints
         for c, b, g, p, s, e, _ in beta_t.keys():
             self.model += (
                 xsum(beta_t[c, b, g, p, s, e, a] for a in self.A)
@@ -148,7 +191,6 @@ class LPFormulator:
                 == 1
             )
 
-        # Duplet constraints
         for c, p, s, e, _ in beta_d.keys():
             self.model += (
                 xsum(beta_d[c, p, s, e, a] for a in self.A)
@@ -158,7 +200,12 @@ class LPFormulator:
             )
 
     def _add_triplet_beta_constraints(self):
-        """Add elemental attribute constraints for triplets."""
+        """
+        Add elemental attribute constraints for triplets.
+
+        This method builds constraints equating each β_t variable to the
+        weighted sum of β_d variables via the psi coefficients.
+        """
         beta_d = self.decision_vars["beta_d"]
         beta_t = self.decision_vars["beta_t"]
 
@@ -180,7 +227,16 @@ class LPFormulator:
                 self.model += var == cumulative
 
     def _add_duplet_beta_constraints(self):
-        """Add elemental attribute constraints for duplets."""
+        """
+        Add elemental attribute constraints for duplets.
+
+        For each duplet in `cps_tank` that’s a variable, this method:
+        - Gathers matching triplet β_t variables for the same component,
+            binding point, graph, stream, and attribute.
+        - Renormalizes their ψ shares if they don’t sum to 1.
+        - Builds a weighted sum of those β_t variables.
+        - Constrains each duplet β_d to equal that weighted sum.
+        """
         beta_d = self.decision_vars["beta_d"]
         beta_t = self.decision_vars["beta_t"]
 
@@ -216,7 +272,12 @@ class LPFormulator:
                         self.model += beta_d[c, p, s, self.e, a] == cumulative
 
     def _set_objective_function(self):
-        """Set the objective function to minimize slack variables."""
+        """
+        Set the objective function to minimize total slack.
+
+        Model objective is the absolute sum of slack variables
+        penalizing deviations in both duplet and triplet constraints.
+        """
         z_d_pos = self.decision_vars["z_d_pos"]
         z_d_neg = self.decision_vars["z_d_neg"]
         z_t_pos = self.decision_vars["z_t_pos"]
