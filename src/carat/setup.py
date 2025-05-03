@@ -12,7 +12,7 @@ here = Path(__file__).parent
 install_requires = here.joinpath("requirements.txt").read_text().splitlines()
 
 setup(
-    name="carat",
+    name="carat-framework",
     version="0.1.0",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
