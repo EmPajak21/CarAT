@@ -10,7 +10,7 @@ Verifies that:
 import pandas as pd
 from rdkit import Chem
 
-from chem_utils import (
+from carat.chem_utils import (
     bill_of_atoms,
     canonical_smiles,
     contains_carbon,
