@@ -3,7 +3,7 @@
 The processing package provides tools for handling and transforming data:
 
 - `PostProcessConfig` and `PreProcessConfig`: Dataclasses for pre- and post-processing.
-- `DataPreprocessor`: This class takes value chain data and prepares it for the LPFormulator.
+- `DataPreprocessor`: Class takes value chain data and prepares it for LPFormulator.
 """
 
 from .datatypes import PostProcessConfig, PreProcessConfig

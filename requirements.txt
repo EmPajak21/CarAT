@@ -1,7 +1,6 @@
 black==25.1.0
 bottleneck==1.4.2
 brotli==1.0.9
-carat==0.1.0
 cookiecutter==2.6.0
 cryptography==44.0.1
 datasets==3.3.2
