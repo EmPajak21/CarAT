@@ -4,6 +4,7 @@ ep/
 .vscode/
 .pytest_cache/
 build/
+my_carat.egg-info/
 
 # ignore data folder…
 data/*
