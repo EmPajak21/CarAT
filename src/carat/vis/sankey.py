@@ -24,7 +24,7 @@ class SankeyDiagramGenerator:
             beta_d_res (pd.DataFrame): DataFrame with duplet data
             beta_t_res (pd.DataFrame): DataFrame with triplet data
         """
-        self.graph = graph  # self_load_graph(graph_path)
+        self.graph = graph
         self.beta_d_res = beta_d_res
         self.beta_t_res = beta_t_res
         self.sub_node_info = {}
@@ -99,10 +99,8 @@ class SankeyDiagramGenerator:
         Returns:
             pd.DataFrame: Processed DataFrame with expanded substream data
         """
-        # Extract edges
-        edges = list(self.graph.edges(data=True))
-
         # Create DataFrame from edges
+        edges = list(self.graph.edges(data=True))
         df_trial = pd.DataFrame(edges, columns=["source", "target", "data"])
 
         # Use random values for ratio (replace with actual ratios if available)
@@ -141,6 +139,7 @@ class SankeyDiagramGenerator:
     def _expand_substreams(self, node):
         """
         Expand substreams and values for a node.
+        Returns a default "No carbon data" entry if no substreams are found.
 
         Args:
             node (str): Node identifier
@@ -148,14 +147,15 @@ class SankeyDiagramGenerator:
         Returns:
             list: List of dictionaries with substream data
         """
-        if node in self.sub_node_info:
+        if node in self.sub_node_info and self.sub_node_info[node]:
             substreams_data = self.sub_node_info[node]
             return [
                 {"substream": substream, "biogenic content": value}
                 for substream, value in substreams_data.items()
             ]
         else:
-            return []
+            # Return a default "No carbon data" entry to ensure the node stays connected
+            return [{"substream": "No carbon data", "biogenic content": 0.0}]
 
     def generate_sankey_diagram(
         self, title="Biogenic Carbon Content in TDI Value Chain", width=1000, height=600
@@ -191,7 +191,7 @@ class SankeyDiagramGenerator:
             "lightblue" if node.startswith("t") else "darkblue" for node in nodes
         ]
 
-        # Create the Sankey diagram
+        # Create the Sankey diagram with conditional hover templates
         fig = go.Figure(
             data=[
                 go.Sankey(
@@ -207,7 +207,12 @@ class SankeyDiagramGenerator:
                         target=[link["target"] for link in links],
                         value=[link["value"] for link in links],
                         label=[link["label"] for link in links],
-                        hovertemplate="Substream: %{label}<br>Biogenic Content: %{customdata:.2f}<extra></extra>",
+                        hoverinfo="all",
+                        hoverlabel=dict(bgcolor="white"),
+                        hovertemplate=(
+                            "Substream: %{label}<br>"
+                            "Biogenic Content: %{customdata:.2f}<extra></extra>"
+                        ),
                         color=[link["color"] for link in links],
                         customdata=[link["biogenic content"] for link in links],
                     ),
@@ -247,15 +252,16 @@ class SankeyDiagramGenerator:
             source_idx = node_indices[source]
             target_idx = node_indices[target]
 
-            # Calculate opacity based on biogenic content
-            opacity = biogenic_content
-
-            # Set color based on opacity
-            if opacity == 0:
+            # Set color based on the type of stream
+            if substream == "No carbon data":
+                # Pale yellow for non-carbon streams
+                color = "rgba(255, 255, 200, 0.8)"  # Pale yellow with fixed opacity
+            elif biogenic_content == 0:
+                # Grey for zero biogenic content streams that aren't "No carbon data"
                 color = "rgba(128, 128, 128, 0.8)"  # Grey with fixed opacity
             else:
-                # Light green with calculated opacity
-                color = f"rgba(144, 238, 144, {opacity**3 + 0.1:.2f})"
+                # Light green with calculated opacity for streams with biogenic content
+                color = f"rgba(144, 238, 144, {biogenic_content**3 + 0.1:.2f})"
 
             # Skip links involving nodes with 'N/A' text
             if (
