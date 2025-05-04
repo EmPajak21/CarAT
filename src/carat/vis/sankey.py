@@ -207,8 +207,9 @@ class SankeyDiagramGenerator:
                         target=[link["target"] for link in links],
                         value=[link["value"] for link in links],
                         label=[link["label"] for link in links],
-                        hovertemplate="%{label}",
+                        hovertemplate="Substream: %{label}<br>Biogenic Content: %{customdata:.2f}<extra></extra>",
                         color=[link["color"] for link in links],
+                        customdata=[link["biogenic content"] for link in links],
                     ),
                     visible=True,
                 )
@@ -271,6 +272,7 @@ class SankeyDiagramGenerator:
                     "value": ratio,
                     "label": substream,
                     "color": color,
+                    "biogenic content": biogenic_content,
                 }
             )
 
