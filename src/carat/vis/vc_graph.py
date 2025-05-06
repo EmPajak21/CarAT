@@ -5,7 +5,7 @@ Utilities for converting NetworkX graphs into Mermaid syntax and rendering:
 - nx_to_mermaid(G: nx.Graph) -> str
 - mm(
     graph: str,
-    output_filename: str = "mermaid_diagram.png",
+    output_filename: str = "assets/mermaid_diagram.png",
     figsize: Tuple[int, int] = (12, 10),
     dpi: int = 300
     ) -> bool
@@ -66,7 +66,7 @@ def nx_to_mermaid(G: nx.Graph) -> str:
 
 def mm(
     graph: str,
-    output_filename: str = "mermaid_diagram.png",
+    output_filename: str = "assets/mermaid_diagram.png",
     figsize: Tuple[int, int] = (12, 10),
     dpi: int = 300,
 ) -> bool:
@@ -75,7 +75,7 @@ def mm(
 
     Args:
         graph: The Mermaid diagram code as a string
-        output_filename: Filename to save diagram (default: 'mermaid_diagram.png')
+        output_filename: Path to save diagram (default: 'assets/mermaid_diagram.png')
         figsize: Figure size as (width, height) in inches (default: (12, 10))
         dpi: Resolution of the output image (default: 300)
 
@@ -140,7 +140,7 @@ def mermaid_plot(
 
     # If no output filename specified, use default
     if output_filename is None:
-        output_filename = "mermaid_diagram.png"
+        output_filename = "assets/mermaid_diagram.png"
 
     # Generate the diagram
     mm(mermaid_code, output_filename, figsize, dpi)
