@@ -1,7 +1,7 @@
 """Computes bill-of-atoms (psi) from triplet bills-of-materials.
 
-This module transforms a raw BOM DataFrame into the psi used in the
-LP optimisation step. It provides:
+This module transforms a raw bill-of-materials (BOM) DataFrame into
+the psi used in the LP optimisation step. It provides:
 
 - `compute_psi → Dict[str, Dict[Tuple, float]]`: return psi dict
      keyed by triplet, with carbon‐atom shares per reaction leg.
@@ -53,7 +53,7 @@ def prepare_bom(bom: pd.DataFrame, *, min_mass: float = 1e-4) -> pd.DataFrame:
 
     bom = bom.copy().reset_index()
 
-    # Mappign MOV_CAT to Product/Reactant
+    # Mapping MOV_CAT to Product/Reactant
     bom["ROLE"] = bom["MOV_CAT"].map(
         {"GR": "Product", "BY": "Product", "GI": "Reactant"}
     )
@@ -125,7 +125,7 @@ def make_reaction_smiles(bom: pd.DataFrame) -> pd.DataFrame:
 
 def compute_psi(bom: pd.DataFrame) -> Dict[str, Dict[Tuple[Any, ...], float]]:
     """
-    Return the bill of atoms, psi dict keyed by triplet.
+    Return the bill-of-atoms, psi, dict keyed by triplet.
 
     Parameters
     ----------

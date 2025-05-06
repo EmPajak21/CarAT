@@ -52,4 +52,4 @@ $$
 | $z_{cpse}$ | Positive slack variable for element $e$ in substance $s$, material $p$, at mix node $(c, p)$. |
 | $q_{cpse}$ | Negative slack variable for element $e$ in substance $s$, material $p$, at mix node $(c, p) $. |
 | $\mu_{c'b'g'cp}$ | Mix node share, i.e., the fraction of a virtual tank $(c,p)$ sourced from a production node $(c',b',g') $. |
-| $\psi_{p's'pse}$ | Bill of atoms, i.e., the fraction of element $e$ in substance $s$ in product $p$, sourced from substance $s'$ in product $p'$. |
+| $\psi_{p's'pse}$ | Bill-of-atoms, i.e., the fraction of element $e$ in substance $s$ in product $p$, sourced from substance $s'$ in product $p'$. |

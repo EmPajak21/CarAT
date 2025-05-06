@@ -173,7 +173,7 @@ class LPFormulator:
         """
         Add constraints ensuring attribute shares sum to 1.
 
-        For each triplet (beta_t) and each duplet (beta_d), enforce that the
+        For each triplet (β_t) and each duplet (β_d), enforce that the
         sum of the attribute‐share variables minus their slack variables equals 1.
         """
         beta_d = self.decision_vars["beta_d"]
