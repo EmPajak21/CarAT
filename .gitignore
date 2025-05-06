@@ -1,0 +1,15 @@
+__pycache__/
+carat.egg-info/
+ep/
+.vscode/
+.pytest_cache/
+build/
+my_carat.egg-info/
+
+# ignore data folder…
+data/*
+
+# except for these files:
+!data/graph.pkl
+!data/tdi_anon_dict.pkl
+carat/build/lib/vis/sankey.py
