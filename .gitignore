@@ -11,5 +11,5 @@ data/*
 
 # except for these files:
 !data/graph.pkl
-!data/tdi_anon_dict_new.pkl
+!data/tdi_anon_dict.pkl
 carat/build/lib/vis/sankey.py

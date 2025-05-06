@@ -4,8 +4,8 @@ Helpers for SMILES canonicalization, atom-map cleanup, carbon detection,
 and mapped‐reaction atom counting:
 
 - canonical_smiles(smiles) -> Optional[str]
-- unmap_smiles(smi) -> Optional[str]
-- smiles2molecule(smi) -> Optional[Mol]
+- unmap_smiles(smiles) -> Optional[str]
+- smiles2molecule(smiles) -> Optional[Mol]
 - molecule2smiles(mol) -> Optional[str]
 - contains_carbon(smiles) -> bool
 - update_smiles(row) -> str
@@ -13,6 +13,7 @@ and mapped‐reaction atom counting:
 """
 
 import re
+import warnings
 from typing import Optional, Union
 
 import pandas as pd
@@ -41,13 +42,13 @@ def canonical_smiles(smiles: Optional[str]) -> Optional[str]:
     return Chem.MolToSmiles(mol) if mol else None
 
 
-def unmap_smiles(smi: Union[str, Chem.Mol, None]) -> Optional[str]:
+def unmap_smiles(smiles: Union[str, Chem.Mol, None]) -> Optional[str]:
     """
     Remove atom‐map numbers from a SMILES string or Mol object.
 
     Parameters
     ----------
-    smi : str, rdkit.Chem.rdchem.Mol, or None
+    smiles : str, rdkit.Chem.rdchem.Mol, or None
         SMILES string or Mol for which to strip mapping numbers.
 
     Returns
@@ -55,7 +56,7 @@ def unmap_smiles(smi: Union[str, Chem.Mol, None]) -> Optional[str]:
     str or None
         Unmapped SMILES if parsing succeeds; otherwise None.
     """
-    mol = Chem.MolFromSmiles(smi) if isinstance(smi, str) else smi
+    mol = Chem.MolFromSmiles(smiles) if isinstance(smiles, str) else smiles
     if mol:
         for atom in mol.GetAtoms():
             atom.SetAtomMapNum(0)
@@ -63,13 +64,13 @@ def unmap_smiles(smi: Union[str, Chem.Mol, None]) -> Optional[str]:
     return None
 
 
-def smiles2molecule(smi: str) -> Union[Mol, None]:
+def smiles2molecule(smiles: str) -> Union[Mol, None]:
     """
     Convert a SMILES string to an RDKit Mol object.
 
     Parameters
     ----------
-    smi : str
+    smiles : str
         SMILES representation of the molecule.
 
     Returns
@@ -77,7 +78,7 @@ def smiles2molecule(smi: str) -> Union[Mol, None]:
     rdkit.Chem.rdchem.Mol or None
         RDKit Mol object if parsing succeeds; otherwise None.
     """
-    return MolFromSmiles(smi) if smi is not None else None
+    return MolFromSmiles(smiles) if smiles is not None else None
 
 
 def molecule2smiles(mol: Union[Mol, None]):
@@ -177,8 +178,13 @@ def bill_of_atoms(mapped_rxn: str) -> pd.DataFrame:
     rows = []
     for a in prod_mol.GetAtoms():
         src = origin.get(a.GetAtomMapNum())
-        if not src:
-            continue  # atom was not present in any educt
+        if not src and a.GetSymbol() == "C":
+            # Atom was not present in any educt, raise a warning
+            warnings.warn(
+                f"Carbon atom with map number {a.GetAtomMapNum()} in the product "
+                f"does not have a corresponding source in the educts."
+            )
+            continue
         rows.append((product, src, a.GetSymbol(), 1))
         nH = a.GetTotalNumHs()
         if nH:

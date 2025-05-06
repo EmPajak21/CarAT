@@ -3,7 +3,7 @@
 The core package contains the main functionality of CarAT:
 
 - `compute_psi`: Atom maps the chemical reaction in the value to chain,
-    this returns the bill of atoms, psi.
+    this returns the bill-of-atoms, psi.
 - `LPFormulator`: This formulates the linear program in MIP, thus
     calculating the biogenic carbon content across the given value chain.
 """

@@ -92,9 +92,9 @@ class DataPreprocessor:
             # Filter out rows where MOV_CAT is "GI" i.e., reactants and SMILES.
             (self.trip_bom["MOV_CAT"] != "GI")
             & (
-                # Includ SMILES with carbon atoms.
-                self.trip_bom.index.get_level_values(4).str.contains("C")
-                | self.trip_bom.index.get_level_values(4).str.contains("unknown")
+                # Include SMILES with carbon atoms.
+                self.trip_bom.index.get_level_values("SMILES").str.contains("C")
+                | self.trip_bom.index.get_level_values("SMILES").str.contains("unknown")
             ),
             "RATIO",  # Select the "RATIO" column
         ]
@@ -106,7 +106,6 @@ class DataPreprocessor:
         ]
 
         # Assert that the names are exactly as expected
-
         trip_out = trip_out.reorder_levels(col_names)
         assert (
             trip_out.index.names == col_names
