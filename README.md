@@ -42,6 +42,11 @@ To begin using CarAT, clone the repository and set up the environment using Cond
     conda activate carat  
     ```
 
+3. **Install local `carat` package**  
+    ```bash  
+    pip install -e .
+    ```
+
 ## 📈 Example Usage
 
 For a comprehensive walkthrough of CarAT's functionality, refer to the included Jupyter notebook:  
