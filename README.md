@@ -130,8 +130,13 @@ This example demonstrates the complete workflow, including:
 
 [reference2]: https://www.science.org/doi/10.1126/sciadv.abe4166 "Schwaller, P., Hoover, B., Reymond, J.-L., Strobelt, H., & Laino, T. (2021). Extraction of organic chemistry grammar from unsupervised learning of chemical reactions. Science Advances, 7(15), eabe4166."
 
+
 ## 📝 Citation
 
 The corresponding manuscript for this repository is currently under preparation. In the interim, please cite this work as follows:
 
 *Pajak, E., Walz, D., Walz, O., Helleckes, L. M, Hellgardt, K. and del Rio Chanona, A. CarAT: Carbon Atom Tracing across Industrial Chemical Value Chains via Chemistry Language Models. (Manuscript in preparation)*
+
+## ⚖️ License
+
+This project is licensed under the GNU Affero General Public License v3.0. See the [LICENSE](LICENSE.md) file for details.
