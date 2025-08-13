@@ -18,7 +18,7 @@ Terminology:
      - SMILES --> canonical SMILES string of the component.
 """
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -30,8 +30,7 @@ from carat.chem_utils import bill_of_atoms, canonical_smiles
 
 
 def prepare_bom(bom: pd.DataFrame, *, min_mass: float = 1e-4) -> pd.DataFrame:
-    """
-    Subset and normalize the raw bill-of-materials table.
+    """Subset and normalize the raw bill-of-materials table.
 
     Parameters
     ----------
@@ -45,8 +44,8 @@ def prepare_bom(bom: pd.DataFrame, *, min_mass: float = 1e-4) -> pd.DataFrame:
     -------
     pd.DataFrame
          The processed bill-of-materials DataFrame.
-    """
 
+    """
     required_columns = {"MOV_CAT", "COCD", "BP", "PBG_GR", "RATIO", "SMILES"}
     missing_columns = required_columns - set(bom.reset_index().columns)
     assert not missing_columns, f"Missing required columns: {missing_columns}"
@@ -84,8 +83,7 @@ def prepare_bom(bom: pd.DataFrame, *, min_mass: float = 1e-4) -> pd.DataFrame:
 
 
 def make_reaction_smiles(bom: pd.DataFrame) -> pd.DataFrame:
-    """
-    Create one reaction SMILES per bom produt row.
+    """Create one reaction SMILES per bom produt row.
 
     Parameters
     ----------
@@ -96,6 +94,7 @@ def make_reaction_smiles(bom: pd.DataFrame) -> pd.DataFrame:
     -------
     pd.DataFrame
          A DataFrame containing reaction SMILES strings for each triplet.
+
     """
     rows = []
     for trip, grp in bom.groupby("TRIPLET"):
@@ -113,7 +112,8 @@ def make_reaction_smiles(bom: pd.DataFrame) -> pd.DataFrame:
 
             # Construct the left-hand side of the reaction (reactants)
             left = ".".join(
-                ".".join([smi] * k) for smi, k in zip(reactants["SMILES"], n)
+                ".".join([smi] * k)
+                for smi, k in zip(reactants["SMILES"], n, strict=False)
             )
 
             # Append the reaction SMILES (reactants >> product) to the rows list
@@ -123,9 +123,8 @@ def make_reaction_smiles(bom: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def compute_psi(bom: pd.DataFrame) -> Dict[str, Dict[Tuple[Any, ...], float]]:
-    """
-    Return the bill-of-atoms, psi, dict keyed by triplet.
+def compute_psi(bom: pd.DataFrame) -> dict[str, dict[tuple[Any, ...], float]]:
+    """Return the bill-of-atoms, psi, dict keyed by triplet.
 
     Parameters
     ----------
@@ -136,6 +135,7 @@ def compute_psi(bom: pd.DataFrame) -> Dict[str, Dict[Tuple[Any, ...], float]]:
     -------
     Dict[str, Dict[Tuple[Any, ...], float]]
          A dictionary keyed by triplet, containing carbon-atom shares per reaction leg.
+
     """
     bom = prepare_bom(bom)
     rxn_df = make_reaction_smiles(bom)

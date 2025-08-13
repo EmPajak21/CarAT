@@ -2,8 +2,9 @@
 # <img src="assets/carat_logo.png" alt="CarAT Logo" width="100" height="auto" style="vertical-align: middle;"> &mdash; Carbon Atom Tracker
 
 [![Run Tests](https://github.com/EmPajak21/carat/actions/workflows/run-tests.yml/badge.svg)](https://github.com/EmPajak21/carat/actions/workflows/run-tests.yml/badge.svg)
-[![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-390/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 
 CarAT (Carbon Atom Tracker) is an automated tool designed to track biogenic carbon content (BCC) across complex industrial value chains. With the Together for Sustainability (TfS) consortium mandating BCC reporting by 2026 ([TfS Guidelines][reference1]), CarAT offers a scalable solution to this critical industry challenge. Additionally, it serves as a decision support tool for decarbonisation strategies by facilitating the substitution of fossil carbon with biogenic carbon.
 
@@ -28,24 +29,87 @@ CarAT's methodology comprises three primary stages:
 2. **Atom Mapping**: Utilises RXNMapper from [Schwaller et al.][reference2] to track atoms through chemical reactions.
 3. **Optimisation**: Applies linear programming to compute BCC across the entire value chain.
 
+### Linear Program Formulation
+
+$$
+\begin{alignedat}{4}
+& \text{minimize} && \sum_{cbgpse}(z_{cbgpse}-q_{cbgpse})+\sum_{cpse}(z_{cpse}-q_{cpse}) \quad\quad\quad\quad\quad && &&(a) \\
+& \text{s.t.} && && && \\
+& && \beta_{cbgpsea} = \sum_{p's'}\psi_{p's'pse}\ \beta_{cp's'ea} \:,
+&&\quad \forall c,b,g,p,s,e,a \quad && (b) \\
+& && \beta_{cpsea} = \sum_{c'b'g'}\mu_{c'b'g'cp}\ \beta_{c'b'g'psea} \:,
+&&\quad \forall c,p,s,e,a && (c) \\
+& && \sum_a \beta_{cbgpsea}-z_{cbgpse}-q_{cbgpse}=1,
+&&\quad \forall c,b,g,p,s,e && (d) \\
+& && \sum_a \beta_{cpsea}-z_{cpse}-q_{cpse}=1,
+&&\quad \forall c,p,s,e && (e) \\
+& && \beta_{cbgpsea} \in [0,1],
+&&\quad \forall c,b,g,p,s,e,a && (f) \\
+& && \beta_{cpsea} \in [0,1],
+&&\quad \forall c,p,s,e,a && (g) \\
+& && z_{cbgpse} \in \mathbb{R}^+, \quad q_{cbgpse} \in \mathbb{R}^-,
+&&\quad \forall c,b,g,p,s,e && (h) \\
+& && z_{cpse} \in \mathbb{R}^+, \quad q_{cpse} \in \mathbb{R}^-,
+&&\quad \forall c,p,s,e && (i)
+\end{alignedat}
+$$
+
+
+*N.B. $c'$ denotes the inlet company code, whereas $c$ denotes the outlet company code.*
+
+**Table 1. Value chain indices**
+
+
+| Index | Description |
+|-------|-------------|
+| $a$ | Elemental attribute (e.g., biogenic, fossil, etc.) |
+| $b$ | Business process, anonymized coding: PLNTb |
+| $c$ | Company code, anonymized coding: COMPc |
+| $e$ | Element (e.g., carbon) |
+| $g$ | Main product, same structure as $p$ |
+| $p$ | Product, anonymized coding: PRODp |
+| $s$ | Substance, represented by SMILES |
+
+
+**Table 2. Decision variables, slack variables, and parameters**
+
+| Notation | Description |
+|----------|-------------|
+| $\beta_{cbgpsea}$ | Fraction of elemental attribute $a$ of element $e$ in substance $s$, material $p$, at production node $(c, b, g) $. |
+| $\beta_{cpsea}$ | Fraction of elemental attribute $a$ of element $e$ in substance $s$, material $p$, at mix node $(c, p) $. |
+| $z_{cbgpse}$ | Positive slack variable for element $e$ in substance $s$, material $p$, at production node $(c, b, g)$. |
+| $q_{cbgpse}$ | Negative slack variable for element $e$ in substance $s$, material $p$, at production node $(c, b, g)$. |
+| $z_{cpse}$ | Positive slack variable for element $e$ in substance $s$, material $p$, at mix node $(c, p)$. |
+| $q_{cpse}$ | Negative slack variable for element $e$ in substance $s$, material $p$, at mix node $(c, p) $. |
+| $\mu_{c'b'g'cp}$ | Mix node share, i.e., the fraction of a virtual tank $(c,p)$ sourced from a production node $(c',b',g') $. |
+| $\psi_{p's'pse}$ | Bill-of-atoms, i.e., the fraction of element $e$ in substance $s$ in product $p$, sourced from substance $s'$ in product $p'$. |
+
 ## 🚀 Getting Started  
 
-To begin using CarAT, clone the repository and set up the environment using Conda.
+To begin using CarAT, clone the repository and set up the environment using [uv](https://docs.astral.sh/uv/).
 
-1. **Create the Environment**  
-    ```bash  
-    conda env create -f environment.yml  
-    ```  
+### Installation
 
-2. **Activate the Environment**  
-    ```bash  
-    conda activate carat  
-    ```
+1. **Install uv** (if not already installed)
+   ```bash
+   # On Windows
+   powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+   
+   # On macOS/Linux
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
 
-3. **Install local `carat` package**  
-    ```bash  
-    pip install -e .
-    ```
+2. **Clone and setup the project**
+   ```bash
+   git clone https://github.com/EmPajak21/CarAT.git
+   cd CarAT
+   uv sync
+   ```
+
+3. **Install development dependencies** (optional)
+   ```bash
+   uv sync --group dev
+   ```
 
 ## 📈 Example Usage
 
@@ -70,4 +134,4 @@ This example demonstrates the complete workflow, including:
 
 The corresponding manuscript for this repository is currently under preparation. In the interim, please cite this work as follows:
 
-*Pajak, E., Walz, D., Walz, O., Hellgardt, K. and del Rio Chanona, A. CarAT: Carbon Atom Tracing across Industrial Chemical Value Chains via Chemistry Language Models. (Manuscript in preparation)*
+*Pajak, E., Walz, D., Walz, O., Helleckes, L. M, Hellgardt, K. and del Rio Chanona, A. CarAT: Carbon Atom Tracing across Industrial Chemical Value Chains via Chemistry Language Models. (Manuscript in preparation)*

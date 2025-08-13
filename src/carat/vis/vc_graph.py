@@ -19,28 +19,28 @@ Utilities for converting NetworkX graphs into Mermaid syntax and rendering:
 
 import base64
 import io
-from typing import Optional, Tuple
 
+from IPython.display import Image, display
 import matplotlib.pyplot as plt
 import networkx as nx
-import requests
-from IPython.display import display, Image
 from PIL import Image as PILImage
+import requests
 
 
 def nx_to_mermaid(G: nx.Graph) -> str:
-    """
-    Convert a NetworkX bipartite graph to Mermaid graph syntax.
+    """Convert a NetworkX bipartite graph to Mermaid graph syntax.
 
-    Parameters:
+    Parameters
+    ----------
     G : NetworkX Graph
         A bipartite graph where nodes have a 'bipartite' attribute (0 or 1)
         indicating which set they belong to.
 
-    Returns:
+    Returns
+    -------
     str : Mermaid graph representation
-    """
 
+    """
     # Get the two sets of nodes
     duplets = {n for n, d in G.nodes(data=True) if n.startswith("d")}
 
@@ -67,11 +67,10 @@ def nx_to_mermaid(G: nx.Graph) -> str:
 def mm(
     graph: str,
     output_filename: str = "assets/mermaid_diagram.png",
-    figsize: Tuple[int, int] = (12, 10),
+    figsize: tuple[int, int] = (12, 10),
     dpi: int = 300,
 ) -> bool:
-    """
-    Renders a Mermaid diagram using the mermaid.ink service and saves it as an image.
+    """Render a Mermaid diagram using the mermaid.ink service and save it as an image.
 
     Args:
         graph: The Mermaid diagram code as a string
@@ -81,6 +80,7 @@ def mm(
 
     Returns:
         bool: True if the diagram was successfully rendered and saved, False otherwise
+
     """
     # Clean up the input graph - strip any leading/trailing whitespace
     graph = graph.strip()
@@ -110,20 +110,18 @@ def mm(
         # Use IPython's display for showing the saved image
         display(Image(output_filename))
         return True
-    else:
-        print(f"Error fetching diagram: {response.status_code}")
-        print(f"URL attempted: {url}")
-        return False
+    print(f"Error fetching diagram: {response.status_code}")
+    print(f"URL attempted: {url}")
+    return False
 
 
 def mermaid_plot(
     graph,
-    output_filename: Optional[str] = None,
-    figsize: Tuple[int, int] = (12, 10),
+    output_filename: str | None = None,
+    figsize: tuple[int, int] = (12, 10),
     dpi: int = 300,
 ) -> bool:
-    """
-    Converts a NetworkX graph to Mermaid code and renders it.
+    """Convert a NetworkX graph to Mermaid code and render it.
 
     Args:
         graph: The NetworkX graph to convert and render
@@ -134,6 +132,7 @@ def mermaid_plot(
 
     Returns:
         bool: True if the diagram was successfully rendered and saved, False otherwise
+
     """
     # Convert NetworkX graph to Mermaid code
     mermaid_code = nx_to_mermaid(graph)

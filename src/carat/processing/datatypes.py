@@ -6,7 +6,6 @@ Defines custom data types and configurations used in data processing:
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Set, Tuple
 
 import networkx as nx
 import pandas as pd
@@ -14,8 +13,7 @@ import pandas as pd
 
 @dataclass
 class PreProcessConfig:
-    """
-    Configuration parameters for initial data preprocessing.
+    """Configuration parameters for initial data preprocessing.
 
     Attributes
     ----------
@@ -40,24 +38,24 @@ class PreProcessConfig:
         Directed graph representing the value chain.
     inlets : str, default="base_case_example"
         Type of inlet configuration to apply.
+
     """
 
     trip_bom: pd.DataFrame
     dup: pd.DataFrame
-    duplets: Set[Tuple[str, str]]
-    inlet_duplets: Set[Tuple[str, str]]
-    var_duplets: Set[Tuple[str, str]]
-    triplets: Set[Tuple[str, str, str]]
-    psi: Dict
-    nodes: List[str]
+    duplets: set[tuple[str, str]]
+    inlet_duplets: set[tuple[str, str]]
+    var_duplets: set[tuple[str, str]]
+    triplets: set[tuple[str, str, str]]
+    psi: dict
+    nodes: list[str]
     graph: nx.DiGraph
     inlets: str = "base_case_example"
 
 
 @dataclass
 class PostProcessConfig:
-    """
-    Processed data ready for LP formulation.
+    """Processed data ready for LP formulation.
 
     Attributes
     ----------
@@ -83,18 +81,19 @@ class PostProcessConfig:
         Set of virtual tank configurations (component, product, stream).
     mu : Dict[str, float]
         Normalized connection‐mix share dictionaries for each cps tank.
+
     """
 
-    duplets: Set[Tuple[str, str]]
-    inlet_duplets: Set[Tuple[str, str]]
-    var_duplets: Set[Tuple[str, str]]
-    triplets: Set[Tuple[str, str, str]]
+    duplets: set[tuple[str, str]]
+    inlet_duplets: set[tuple[str, str]]
+    var_duplets: set[tuple[str, str]]
+    triplets: set[tuple[str, str, str]]
     trip_bom: pd.DataFrame
-    psi: Dict
+    psi: dict
     graph: nx.DiGraph
     inlets: str
 
     # New variables from DataPreprocessor
     trip_out: pd.DataFrame
-    cps_tank: Set[Tuple[str, str, str]]
-    mu: Dict[str, float]
+    cps_tank: set[tuple[str, str, str]]
+    mu: dict[str, float]

@@ -12,14 +12,13 @@ Helper functions for data parsing, result formatting, and serialization:
 
 import ast
 import pickle
-from typing import Any, Dict
+from typing import Any
 
 import pandas as pd
 
 
 def get_example_data(file_path="data/tdi_anon.pkl"):
-    """
-    Load example TDI value chain data from a pickle file and add graph nodes.
+    """Load example TDI value chain data from a pickle file and add graph nodes.
 
     Parameters
     ----------
@@ -31,8 +30,8 @@ def get_example_data(file_path="data/tdi_anon.pkl"):
     Dict[str, Any]
         Dictionary of unpacked data items, with an added "nodes" key containing
         the union of duplets and triplets.
-    """
 
+    """
     with open(file_path, "rb") as file:
         data = pickle.load(file)
 
@@ -43,8 +42,7 @@ def get_example_data(file_path="data/tdi_anon.pkl"):
 
 
 def extract_variable_values(var_prefix, model):
-    """
-    Extract optimization variable values into a list of single-key dicts.
+    """Extract optimization variable values into a list of single-key dicts.
 
     Parameters
     ----------
@@ -59,6 +57,7 @@ def extract_variable_values(var_prefix, model):
     List[Dict[Tuple, float]]
         List of dictionaries, each mapping a parsed tuple (derived from var name)
         to its corresponding value.
+
     """
     res_holder = []
     for v in model.vars:
@@ -70,8 +69,7 @@ def extract_variable_values(var_prefix, model):
 
 
 def flatten_dict(data):
-    """
-    Flatten a list of single-key dictionaries with tuple keys into a DataFrame.
+    """Flatten a list of single-key dictionaries with tuple keys into a DataFrame.
 
     Parameters
     ----------
@@ -83,6 +81,7 @@ def flatten_dict(data):
     pd.DataFrame
         DataFrame where each tuple key is expanded into separate "key_i" columns,
         plus a "value" column for the original dictionary’s value.
+
     """
     flattened_data = []
     for d in data:
@@ -101,8 +100,7 @@ def flatten_dict(data):
 
 
 def format_res_df(var_prefix: str, model: Any) -> pd.DataFrame:
-    """
-    Extract decision-variable results from a MIP model into a tidy DataFrame.
+    """Extract decision-variable results from a MIP model into a tidy DataFrame.
 
     Parameters
     ----------
@@ -117,6 +115,7 @@ def format_res_df(var_prefix: str, model: Any) -> pd.DataFrame:
     pd.DataFrame
         DataFrame with columns "key_0", "key_1", …, "key_n", and "value",
         where each row corresponds to one decision variable.
+
     """
     records = []
 
@@ -138,9 +137,8 @@ def format_res_df(var_prefix: str, model: Any) -> pd.DataFrame:
     return pd.DataFrame(records, columns=columns)
 
 
-def process_results(model: Any) -> Dict[str, pd.DataFrame]:
-    """
-    Process model results into labeled DataFrames for triplet and duplet variables.
+def process_results(model: Any) -> dict[str, pd.DataFrame]:
+    """Process model results into labeled DataFrames for triplet and duplet variables.
 
     Parameters
     ----------
@@ -153,6 +151,7 @@ def process_results(model: Any) -> Dict[str, pd.DataFrame]:
         Dictionary containing four DataFrames:
         - "beta_t_res", "beta_d_res": attribute-mix variables for triplets and duplets.
         - "z_t_res", "z_d_res": slack variables for triplets and duplets.
+
     """
     # Slack variables (positive and negative) for triplets
     z_t_res = format_res_df("z_t", model)
@@ -220,9 +219,8 @@ def process_results(model: Any) -> Dict[str, pd.DataFrame]:
     }
 
 
-def save_results(results: Dict[str, Any], pkl_output_path: str) -> None:
-    """
-    Save a results dictionary to a pickle file.
+def save_results(results: dict[str, Any], pkl_output_path: str) -> None:
+    """Save a results dictionary to a pickle file.
 
     Parameters
     ----------
@@ -230,6 +228,7 @@ def save_results(results: Dict[str, Any], pkl_output_path: str) -> None:
         Dictionary containing result DataFrames and other serializable objects.
     pkl_output_path : str
         File path where the pickle file will be written.
+
     """
     with open(pkl_output_path, "wb") as f:
         pickle.dump(results, f)

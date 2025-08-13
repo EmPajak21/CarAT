@@ -1,10 +1,110 @@
-[tool.isort]
-profile = "black"
-sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
-lines_between_sections = 1
-known_first_party = ["chem_utils"]
-force_alphabetical_sort_within_sections = true
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
-name = "my-carat"
+name = "carat"
 version = "0.1.0"
+description = "CarAT: Carbon Atom Tracker"
+authors = [
+    {name = "Emma Pajak", email = "emma.pajak19@imperial.ac.uk"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+    "pandas",
+    "numpy",
+    "rdkit-pypi",
+    "rxnmapper",
+    "mip",
+    "plotly",
+    "matplotlib",
+    "networkx",
+    "pillow",  # PIL is provided by pillow package
+    "requests",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pre-commit==4.2.0",
+    "pytest==8.3.5",
+    "pip-chill==1.0.3",
+]
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "pre-commit==4.2.0",
+    "pytest==8.3.5",
+    "pip-chill==1.0.3",
+]
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+line-length = 88
+indent-width = 4
+
+[tool.ruff.lint]
+# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
+# Plus docstring conventions (D), and more (but exclude import sorting to avoid conflicts with formatter)
+select = ["E", "F", "D", "UP", "B", "C4", "PIE", "SIM", "RET"]
+ignore = [
+    "D100",  # Missing docstring in public module
+    "D101",  # Missing docstring in public class  
+    "D102",  # Missing docstring in public method
+    "D103",  # Missing docstring in public function
+    "D104",  # Missing docstring in public package
+    "D105",  # Missing docstring in magic method
+    "D203",  # 1 blank line required before class docstring (conflicts with D211)
+    "D213",  # Multi-line docstring summary should start at the second line (conflicts with D212)
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.isort]
+known-first-party = ["carat"]
+force-sort-within-sections = true
+lines-after-imports = 1
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"

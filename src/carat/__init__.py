@@ -11,3 +11,5 @@ __version__ = "0.1.0"
 
 from .chem_utils import bill_of_atoms, canonical_smiles
 from .utils import get_example_data
+
+__all__ = ["bill_of_atoms", "canonical_smiles", "get_example_data"]

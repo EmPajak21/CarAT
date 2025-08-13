@@ -16,13 +16,13 @@ class SankeyDiagramGenerator:
     """Generate Sankey diagrams from graph data with biogenic content information."""
 
     def __init__(self, graph, beta_d_res, beta_t_res):
-        """
-        Initialize the Sankey diagram generator.
+        """Initialize the Sankey diagram generator.
 
         Args:
-            graph_path (str): Path to the pickled graph file
+            graph (str): Path to the pickled graph file
             beta_d_res (pd.DataFrame): DataFrame with duplet data
             beta_t_res (pd.DataFrame): DataFrame with triplet data
+
         """
         self.graph = graph
         self.beta_d_res = beta_d_res
@@ -31,8 +31,7 @@ class SankeyDiagramGenerator:
         self.node_labels = {}
 
     def prepare_data(self):
-        """
-        Prepare the data for the Sankey diagram.
+        """Prepare the data for the Sankey diagram.
 
         This includes creating biogenic content dictionaries and preparing
         the data structure for the visualization.
@@ -73,12 +72,12 @@ class SankeyDiagramGenerator:
         }
 
     def _process_biogenic_content(self, df, key_column):
-        """
-        Process biogenic content data from a DataFrame.
+        """Process biogenic content data from a DataFrame.
 
         Args:
             df (pd.DataFrame): DataFrame containing biogenic content data
             key_column (str): Column name for the node identifier
+
         """
         for _, row in df.iterrows():
             node_key = row[key_column]
@@ -93,11 +92,11 @@ class SankeyDiagramGenerator:
             self.sub_node_info[node_key][smiles] = optimal
 
     def create_edge_dataframe(self):
-        """
-        Create a DataFrame from graph edges with additional biogenic content.
+        """Create a DataFrame from graph edges with additional biogenic content.
 
         Returns:
             pd.DataFrame: Processed DataFrame with expanded substream data
+
         """
         # Create DataFrame from edges
         edges = list(self.graph.edges(data=True))
@@ -125,20 +124,16 @@ class SankeyDiagramGenerator:
         )
 
         # Aggregate ratios for each source-target-substream combination
-        df_agg = df_trial.groupby(
-            ["source", "target", "substream"], as_index=False
-        ).agg(
+        return df_trial.groupby(["source", "target", "substream"], as_index=False).agg(
             {
                 "ratio": "sum",
                 "biogenic content": "first",
             }
         )
 
-        return df_agg
-
     def _expand_substreams(self, node):
-        """
-        Expand substreams and values for a node.
+        """Expand substreams and values for a node.
+
         Returns a default "No carbon data" entry if no substreams are found.
 
         Args:
@@ -146,6 +141,7 @@ class SankeyDiagramGenerator:
 
         Returns:
             list: List of dictionaries with substream data
+
         """
         if node in self.sub_node_info and self.sub_node_info[node]:
             substreams_data = self.sub_node_info[node]
@@ -153,15 +149,13 @@ class SankeyDiagramGenerator:
                 {"substream": substream, "biogenic content": value}
                 for substream, value in substreams_data.items()
             ]
-        else:
-            # Return a default "No carbon data" entry to ensure the node stays connected
-            return [{"substream": "No carbon data", "biogenic content": 0.0}]
+        # Return a default "No carbon data" entry to ensure the node stays connected
+        return [{"substream": "No carbon data", "biogenic content": 0.0}]
 
     def generate_sankey_diagram(
         self, title="Biogenic Carbon Content in TDI Value Chain", width=1000, height=600
     ):
-        """
-        Generate a Sankey diagram visualization.
+        """Generate a Sankey diagram visualization.
 
         Args:
             title (str): Title for the diagram
@@ -170,6 +164,7 @@ class SankeyDiagramGenerator:
 
         Returns:
             plotly.graph_objects.Figure: The generated Sankey diagram figure
+
         """
         # Create edge dataframe
         df_agg = self.create_edge_dataframe()
@@ -195,27 +190,27 @@ class SankeyDiagramGenerator:
         fig = go.Figure(
             data=[
                 go.Sankey(
-                    node=dict(
-                        pad=10,
-                        thickness=10,
-                        line=dict(color="black", width=0.5),
-                        label=node_labels_list,
-                        color=node_colors,
-                    ),
-                    link=dict(
-                        source=[link["source"] for link in links],
-                        target=[link["target"] for link in links],
-                        value=[link["value"] for link in links],
-                        label=[link["label"] for link in links],
-                        hoverinfo="all",
-                        hoverlabel=dict(bgcolor="white"),
-                        hovertemplate=(
+                    node={
+                        "pad": 10,
+                        "thickness": 10,
+                        "line": {"color": "black", "width": 0.5},
+                        "label": node_labels_list,
+                        "color": node_colors,
+                    },
+                    link={
+                        "source": [link["source"] for link in links],
+                        "target": [link["target"] for link in links],
+                        "value": [link["value"] for link in links],
+                        "label": [link["label"] for link in links],
+                        "hoverinfo": "all",
+                        "hoverlabel": {"bgcolor": "white"},
+                        "hovertemplate": (
                             "Substream: %{label}<br>"
                             "Biogenic Content: %{customdata:.2f}<extra></extra>"
                         ),
-                        color=[link["color"] for link in links],
-                        customdata=[link["biogenic content"] for link in links],
-                    ),
+                        "color": [link["color"] for link in links],
+                        "customdata": [link["biogenic content"] for link in links],
+                    },
                     visible=True,
                 )
             ]
@@ -224,7 +219,7 @@ class SankeyDiagramGenerator:
         # Update layout
         fig.update_layout(
             title=title,
-            font=dict(size=14, color="black"),
+            font={"size": 14, "color": "black"},
             width=width,
             height=height,
         )
@@ -232,8 +227,7 @@ class SankeyDiagramGenerator:
         return fig
 
     def _prepare_links(self, df_agg, node_indices):
-        """
-        Prepare links data for the Sankey diagram.
+        """Prepare links data for the Sankey diagram.
 
         Args:
             df_agg (pd.DataFrame): Aggregated DataFrame with edge data
@@ -241,6 +235,7 @@ class SankeyDiagramGenerator:
 
         Returns:
             list: List of link dictionaries for the Sankey diagram
+
         """
         links = []
         for _, row in df_agg.iterrows():
@@ -285,36 +280,36 @@ class SankeyDiagramGenerator:
         return links
 
     def save_diagram(self, fig, filename="sankey_diagram.html", scale=2):
-        """
-        Save the Sankey diagram to a file.
+        """Save the Sankey diagram to a file.
 
         Args:
             fig (plotly.graph_objects.Figure): The Sankey diagram figure
             filename (str): Output filename
             scale (int): Resolution scale factor
+
         """
         fig.write_html(filename)
         print(f"Diagram saved as {filename}")
 
     def display_diagram(self, fig):
-        """
-        Display the Sankey diagram.
+        """Display the Sankey diagram.
 
         Args:
             fig (plotly.graph_objects.Figure): The Sankey diagram figure
+
         """
         fig.show()
 
     @staticmethod
     def view_saved_diagram(html_file_path):
-        """
-        Open a previously saved Sankey diagram HTML file in the default web browser.
+        """Open a previously saved Sankey diagram HTML file in the default web browser.
 
         Args:
             html_file_path (str): Path to the saved HTML file
 
         Returns:
             bool: True if successful, False otherwise
+
         """
         if not os.path.exists(html_file_path):
             print(f"Error: File not found at {html_file_path}")

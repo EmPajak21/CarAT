@@ -21,8 +21,7 @@ from carat.chem_utils import (
 
 
 def test_canonical_smiles():
-    """
-    Ensure `canonical_smiles` returns a valid canonical SMILES or None.
+    """Ensure `canonical_smiles` returns a valid canonical SMILES or None.
 
     Checks that:
     - A valid SMILES string is returned unchanged if already canonical.
@@ -41,8 +40,7 @@ def test_canonical_smiles():
 
 
 def test_unmap_smiles():
-    """
-    Verify that `unmap_smiles` removes atom-map labels correctly.
+    """Verify that `unmap_smiles` removes atom-map labels correctly.
 
     Checks that:
     - Mapped SMILES lose their map numbers.
@@ -63,8 +61,7 @@ def test_unmap_smiles():
 
 
 def test_smiles2molecule_and_molecule2smiles():
-    """
-    Test round-trip conversion between SMILES and RDKit Mol objects.
+    """Test round-trip conversion between SMILES and RDKit Mol objects.
 
     Ensures that:
     - A valid SMILES string produces an RDKit Mol.
@@ -83,8 +80,7 @@ def test_smiles2molecule_and_molecule2smiles():
 
 
 def test_contains_carbon():
-    """
-    Confirm that `contains_carbon` correctly identifies carbon presence.
+    """Confirm that `contains_carbon` correctly identifies carbon presence.
 
     Tests that:
     - SMILES with at least one carbon atom return True.
@@ -103,8 +99,7 @@ def test_contains_carbon():
 
 
 def test_smiles_round_trip_conversion():
-    """
-    Test round-trip conversion from SMILES to Mol and back to SMILES.
+    """Test round-trip conversion from SMILES to Mol and back to SMILES.
 
     Verifies that for a variety of valid SMILES strings, converting to an RDKit Mol
     via `smiles2molecule` and then back to SMILES via `molecule2smiles` yields
@@ -131,8 +126,7 @@ def test_smiles_round_trip_conversion():
 
 
 def test_bill_of_atoms():
-    """
-    Test the `bill_of_atoms` function with a simple mapped reaction.
+    """Test the `bill_of_atoms` function with a simple mapped reaction.
 
     Verifies that:
     - Atom mappings are correctly parsed from educts and products.

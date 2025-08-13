@@ -6,6 +6,9 @@ ep/
 build/
 my_carat.egg-info/
 
+# uv specific
+.venv/
+
 # ignore data folder…
 data/*
 

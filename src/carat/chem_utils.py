@@ -14,7 +14,6 @@ and mapped‐reaction atom counting:
 
 import re
 import warnings
-from typing import Optional, Union
 
 import pandas as pd
 from rdkit import Chem
@@ -22,9 +21,8 @@ from rdkit.Chem import MolFromSmiles, MolToSmiles
 from rdkit.Chem.rdchem import Mol
 
 
-def canonical_smiles(smiles: Optional[str]) -> Optional[str]:
-    """
-    Return the RDKit‐canonical SMILES string.
+def canonical_smiles(smiles: str | None) -> str | None:
+    """Return the RDKit‐canonical SMILES string.
 
     Parameters
     ----------
@@ -35,6 +33,7 @@ def canonical_smiles(smiles: Optional[str]) -> Optional[str]:
     -------
     str or None
         Canonical SMILES if input is valid; otherwise None.
+
     """
     if not smiles:
         return None
@@ -42,9 +41,8 @@ def canonical_smiles(smiles: Optional[str]) -> Optional[str]:
     return Chem.MolToSmiles(mol) if mol else None
 
 
-def unmap_smiles(smiles: Union[str, Chem.Mol, None]) -> Optional[str]:
-    """
-    Remove atom‐map numbers from a SMILES string or Mol object.
+def unmap_smiles(smiles: str | Chem.Mol | None) -> str | None:
+    """Remove atom‐map numbers from a SMILES string or Mol object.
 
     Parameters
     ----------
@@ -55,6 +53,7 @@ def unmap_smiles(smiles: Union[str, Chem.Mol, None]) -> Optional[str]:
     -------
     str or None
         Unmapped SMILES if parsing succeeds; otherwise None.
+
     """
     mol = Chem.MolFromSmiles(smiles) if isinstance(smiles, str) else smiles
     if mol:
@@ -64,9 +63,8 @@ def unmap_smiles(smiles: Union[str, Chem.Mol, None]) -> Optional[str]:
     return None
 
 
-def smiles2molecule(smiles: str) -> Union[Mol, None]:
-    """
-    Convert a SMILES string to an RDKit Mol object.
+def smiles2molecule(smiles: str) -> Mol | None:
+    """Convert a SMILES string to an RDKit Mol object.
 
     Parameters
     ----------
@@ -77,13 +75,13 @@ def smiles2molecule(smiles: str) -> Union[Mol, None]:
     -------
     rdkit.Chem.rdchem.Mol or None
         RDKit Mol object if parsing succeeds; otherwise None.
+
     """
     return MolFromSmiles(smiles) if smiles is not None else None
 
 
-def molecule2smiles(mol: Union[Mol, None]):
-    """
-    Convert an RDKit Mol object to a SMILES string.
+def molecule2smiles(mol: Mol | None):
+    """Convert an RDKit Mol object to a SMILES string.
 
     Parameters
     ----------
@@ -94,13 +92,13 @@ def molecule2smiles(mol: Union[Mol, None]):
     -------
     str or None
         SMILES representation if Mol is valid; otherwise None.
+
     """
     return MolToSmiles(mol) if mol is not None else None
 
 
 def contains_carbon(smiles):
-    """
-    Check if a SMILES string contains at least one un‐mapped carbon atom.
+    """Check if a SMILES string contains at least one un‐mapped carbon atom.
 
     This excludes chlorine ('Cl') and NaN entries.
 
@@ -113,16 +111,15 @@ def contains_carbon(smiles):
     -------
     bool
         True if at least one carbon atom (not part of 'Cl') is present; False otherwise.
+
     """
     if pd.isna(smiles):
         return False
-    else:
-        return bool(re.search(r"\bC(?!l)\b|C[^l1]", smiles))
+    return bool(re.search(r"\bC(?!l)\b|C[^l1]", smiles))
 
 
 def update_smiles(row):
-    """
-    Normalize SMILES values in a DataFrame row.
+    """Normalize SMILES values in a DataFrame row.
 
     Converts 'None' or NaN to the literal 'unknown', otherwise canonicalizes.
 
@@ -135,16 +132,15 @@ def update_smiles(row):
     -------
     str
         'unknown' if input is missing/invalid; otherwise the canonical SMILES.
+
     """
     if (row["SMILES"] == "None") or pd.isna(row["SMILES"]):
         return "unknown"
-    else:
-        return canonical_smiles(row["SMILES"])
+    return canonical_smiles(row["SMILES"])
 
 
 def bill_of_atoms(mapped_rxn: str) -> pd.DataFrame:
-    """
-    Build a count of product atoms by their educt origin.
+    """Build a count of product atoms by their educt origin.
 
     Parses a mapped reaction SMILES, tracks atom‐map indices from educts,
     and tallies how many atoms in the product derive from each educt.
@@ -158,6 +154,7 @@ def bill_of_atoms(mapped_rxn: str) -> pd.DataFrame:
     -------
     pandas.DataFrame
         Aggregated counts with columns ["PROD", "EDUCT", "ATOM", "COUNT"].
+
     """
     left, prod_mapped = mapped_rxn.split(">>")
     educt_frags = left.split(".")
@@ -182,7 +179,8 @@ def bill_of_atoms(mapped_rxn: str) -> pd.DataFrame:
             # Atom was not present in any educt, raise a warning
             warnings.warn(
                 f"Carbon atom with map number {a.GetAtomMapNum()} in the product "
-                f"does not have a corresponding source in the educts."
+                f"does not have a corresponding source in the educts.",
+                stacklevel=2,
             )
             continue
         rows.append((product, src, a.GetSymbol(), 1))

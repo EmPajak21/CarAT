@@ -7,9 +7,9 @@ Results can be processed and serialized via carat.utils.
 """
 
 import logging
-from typing import Any, Dict, Set, Tuple
+from typing import Any
 
-from mip import CBC, minimize, Model, xsum
+from mip import CBC, Model, minimize, xsum
 
 from carat.utils import process_results, save_results
 
@@ -27,11 +27,19 @@ class LPFormulator:
         Preprocessed data from the DataPreprocessor.
     inlets : str, optional
         Inlet conditions to use, by default "base_case_example".
+
     """
 
     def __init__(
-        self, preprocessed_data: Dict[str, Any], inlets: str = "base_case_example"
+        self, preprocessed_data: dict[str, Any], inlets: str = "base_case_example"
     ):
+        """Initialize the LP formulator with preprocessed data.
+
+        Args:
+            preprocessed_data: Dictionary containing preprocessed value chain data
+            inlets: Type of inlet configuration to use (default: "base_case_example")
+
+        """
         for key, value in vars(preprocessed_data).items():
             setattr(self, key, value)
 
@@ -40,7 +48,7 @@ class LPFormulator:
         self.decision_vars = self._define_decision_vars()
         self.inlets = inlets
 
-    def solve(self, output_results: bool = True, pkl_output_path: str = "") -> Dict:
+    def solve(self, output_results: bool = True, pkl_output_path: str = "") -> dict:
         """Construct and solve the LP optimization problem.
 
         Parameters
@@ -54,6 +62,7 @@ class LPFormulator:
         -------
         Dict
             Results of the optimization.
+
         """
         self._set_inlet_conditions()
         self._add_attribute_sum_constraints()
@@ -79,25 +88,27 @@ class LPFormulator:
 
         return results
 
-    def _define_sets(self) -> Tuple[Set[str], str]:
+    def _define_sets(self) -> tuple[set[str], str]:
         """Define key sets for the LP formulation.
 
         Returns
         -------
         Tuple[Set[str], str]
             A set of attributes and the element to be traced.
+
         """
         A = {"biogenic", "fossil"}
         e = "C"
         return A, e
 
-    def _define_decision_vars(self) -> Dict[str, Dict]:
+    def _define_decision_vars(self) -> dict[str, dict]:
         """Define all decision variables for the LP model.
 
         Returns
         -------
         Dict[str, Dict]
             Dictionary containing decision variables for duplets and triplets.
+
         """
         beta_d = {}
         z_d_pos = {}
@@ -140,8 +151,7 @@ class LPFormulator:
         }
 
     def _set_inlet_conditions(self):
-        """
-        Set inlet conditions based on the selected inlet type.
+        """Set inlet conditions based on the selected inlet type.
 
         - If `self.inlets` is `"base_case_example"`, all inlet duplets are forced to
         fossil = 1 and biogenic = 0.
@@ -152,14 +162,14 @@ class LPFormulator:
         beta_d = self.decision_vars["beta_d"]
 
         if self.inlets == "base_case_example":
-            for c, p, s, e, a in beta_d:
+            for c, p, s, e, _a in beta_d:
                 if (c, p) in self.inlet_duplets:
                     self.model += beta_d[c, p, s, e, "fossil"] == 1
                     self.model += beta_d[c, p, s, e, "biogenic"] == 0
 
         elif self.inlets == "C1":
             inlet_node = ("COMP_2", "PROD_12")
-            for c, p, s, e, a in beta_d:
+            for c, p, s, e, _a in beta_d:
                 if (c, p) in self.inlet_duplets:
                     if c == inlet_node[0] and p == inlet_node[1]:
                         logger.debug("Switching to biogenic for inlet %s", inlet_node)
@@ -170,8 +180,7 @@ class LPFormulator:
                         self.model += beta_d[c, p, s, e, "biogenic"] == 0
 
     def _add_attribute_sum_constraints(self):
-        """
-        Add constraints ensuring attribute shares sum to 1.
+        """Add constraints ensuring attribute shares sum to 1.
 
         For each triplet (β_t) and each duplet (β_d), enforce that the
         sum of the attribute‐share variables minus their slack variables equals 1.
@@ -183,7 +192,7 @@ class LPFormulator:
         z_t_pos = self.decision_vars["z_t_pos"]
         z_t_neg = self.decision_vars["z_t_neg"]
 
-        for c, b, g, p, s, e, _ in beta_t.keys():
+        for c, b, g, p, s, e, _ in beta_t:
             self.model += (
                 xsum(beta_t[c, b, g, p, s, e, a] for a in self.A)
                 - z_t_pos[c, b, g, p, s, e]
@@ -191,7 +200,7 @@ class LPFormulator:
                 == 1
             )
 
-        for c, p, s, e, _ in beta_d.keys():
+        for c, p, s, e, _ in beta_d:
             self.model += (
                 xsum(beta_d[c, p, s, e, a] for a in self.A)
                 - z_d_pos[c, p, s, e]
@@ -200,8 +209,7 @@ class LPFormulator:
             )
 
     def _add_triplet_beta_constraints(self):
-        """
-        Add elemental attribute constraints for triplets.
+        """Add elemental attribute constraints for triplets.
 
         This method builds constraints equating each β_t variable to the
         weighted sum of β_d variables via the psi coefficients.
@@ -219,7 +227,7 @@ class LPFormulator:
                 if key[0] == c and key[1] == b and key[2] == g
             }
 
-            for (c_t, b_t, g_t, p_t, s_t, e_t, a_t), var in beta_t_trip.items():
+            for (c_t, _b_t, _g_t, p_t, s_t, _e_t, a_t), var in beta_t_trip.items():
                 cumulative = 0
                 for (p, s, p_pr, s_pr, e), val in psi_t.items():
                     if p_pr == p_t and s_pr == s_t:
@@ -227,8 +235,7 @@ class LPFormulator:
                 self.model += var == cumulative
 
     def _add_duplet_beta_constraints(self):
-        """
-        Add elemental attribute constraints for duplets.
+        """Add elemental attribute constraints for duplets.
 
         For each duplet in `cps_tank` that’s a variable, this method:
         - Gathers matching triplet β_t variables for the same component,
@@ -263,7 +270,9 @@ class LPFormulator:
                             terms.append(var_t)
                     if shares and sum(shares) != 1:
                         norm = [sh / sum(shares) for sh in shares]
-                        cumulative = sum(n * t for n, t in zip(norm, terms))
+                        cumulative = sum(
+                            n * t for n, t in zip(norm, terms, strict=False)
+                        )
                     else:
                         cumulative = sum(
                             share * terms[i] for i, share in enumerate(shares)
@@ -272,8 +281,7 @@ class LPFormulator:
                         self.model += beta_d[c, p, s, self.e, a] == cumulative
 
     def _set_objective_function(self):
-        """
-        Set the objective function to minimize total slack.
+        """Set the objective function to minimize total slack.
 
         Model objective is the absolute sum of slack variables
         penalizing deviations in both duplet and triplet constraints.
