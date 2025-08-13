@@ -1,11 +1,31 @@
-import networkx as nx
+"""Value chain graph visualization for CarAT.
+
+Utilities for converting NetworkX graphs into Mermaid syntax and rendering:
+
+- nx_to_mermaid(G: nx.Graph) -> str
+- mm(
+    graph: str,
+    output_filename: str = "mermaid_diagram.png",
+    figsize: Tuple[int, int] = (12, 10),
+    dpi: int = 300
+    ) -> bool
+- mermaid_plot(
+    graph: nx.Graph,
+    output_filename: Optional[str] = None,
+    figsize: Tuple[int, int] = (12, 10),
+    dpi: int = 300
+    ) -> bool
+"""
+
 import base64
 import io
-import requests
-from typing import Tuple, Optional
-from IPython.display import Image, display
-from PIL import Image as PILImage
+from typing import Optional, Tuple
+
 import matplotlib.pyplot as plt
+import networkx as nx
+import requests
+from IPython.display import display, Image
+from PIL import Image as PILImage
 
 
 def nx_to_mermaid(G: nx.Graph) -> str:
@@ -103,10 +123,10 @@ def mermaid_plot(
     dpi: int = 300,
 ) -> bool:
     """
-    Converts a networkx graph to mermaid code and renders it.
+    Converts a NetworkX graph to Mermaid code and renders it.
 
     Args:
-        graph: The networkx graph to convert and render
+        graph: The NetworkX graph to convert and render
         output_filename: Optional custom filename for the output image
                         (default: 'mermaid_diagram.png')
         figsize: Figure size as (width, height) in inches (default: (12, 10))
@@ -115,7 +135,7 @@ def mermaid_plot(
     Returns:
         bool: True if the diagram was successfully rendered and saved, False otherwise
     """
-    # Convert networkx graph to mermaid code
+    # Convert NetworkX graph to Mermaid code
     mermaid_code = nx_to_mermaid(graph)
 
     # If no output filename specified, use default

@@ -1,15 +1,15 @@
-"""
-Sankey Diagram Generator for Biogenic Carbon Content Visualization.
+"""Sankey diagram generation for CarAT.
 
-This module creates Sankey diagrams to visualize biogenic carbon content
-in TDI value chains, with color intensity representing biogenic content.
+Main class:
+- SankeyDiagramGenerator: create and render Sankey diagrams from graph data.
 """
 
 import os
+import webbrowser
+
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-import webbrowser
 
 
 class SankeyDiagramGenerator:

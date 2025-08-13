@@ -1,19 +1,36 @@
-import pickle
+"""General utilities for CarAT.
+
+Helper functions for data parsing, result formatting, and serialization:
+
+- get_example_data(file_path: str = "data/tdi_anon.pkl") -> Dict[str, Any]
+- extract_variable_values(var_str: str, model: Any) -> List[Dict[Tuple, float]]
+- flatten_dict(data: List[Dict]) -> pd.DataFrame
+- format_res_df(var_prefix: str, model: Any) -> pd.DataFrame
+- process_results(model: Any) -> Dict[str, pd.DataFrame]
+- save_results(results: Dict[str, Any], pkl_output_path: str) -> None
+"""
+
 import ast
+import pickle
+from typing import Any, Dict
+
 import pandas as pd
-from typing import Dict, Any
 
 
 def get_example_data(file_path="data/tdi_anon.pkl"):
     """
-    Load example TDI value chain data from a pickle file.
+    Load example TDI value chain data from a pickle file and add graph nodes.
 
-    Parameters:
-    file_path : str
-        Path to the pickle file containing the example data.
+    Parameters
+    ----------
+    file_path : str, optional
+        Path to the example data pickle file (default is "data/tdi_anon.pkl").
 
-    Returns:
-    tuple : Unpacked data items and nodes
+    Returns
+    -------
+    Dict[str, Any]
+        Dictionary of unpacked data items, with an added "nodes" key containing
+        the union of duplets and triplets.
     """
 
     with open(file_path, "rb") as file:
@@ -25,10 +42,27 @@ def get_example_data(file_path="data/tdi_anon.pkl"):
     return data
 
 
-def opt_res_to_list_dict(var_str, model):
+def extract_variable_values(var_prefix, model):
+    """
+    Extract optimization variable values into a list of single-key dicts.
+
+    Parameters
+    ----------
+    var_prefix : str
+        Prefix of the variable names to filter on (e.g., "x_", "z_t").
+    model : Any
+        Optimized model object with a `.vars` attribute iterable of variable objects
+        having `.name` and `.x` attributes.
+
+    Returns
+    -------
+    List[Dict[Tuple, float]]
+        List of dictionaries, each mapping a parsed tuple (derived from the variable name)
+        to its corresponding value.
+    """
     res_holder = []
     for v in model.vars:
-        if v.name.startswith(var_str):
+        if v.name.startswith(var_prefix):
             tuple_str = v.name.split(":", 1)[1].strip()
             res_tuple = ast.literal_eval(tuple_str)
             res_holder.append({res_tuple: v.x})
@@ -36,6 +70,20 @@ def opt_res_to_list_dict(var_str, model):
 
 
 def flatten_dict(data):
+    """
+    Flatten a list of single-key dictionaries with tuple keys into a DataFrame.
+
+    Parameters
+    ----------
+    data : List[Dict]
+        List where each dict has exactly one key, which may be a tuple.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame where each tuple key is expanded into separate "key_i" columns,
+        plus a "value" column for the original dictionary’s value.
+    """
     flattened_data = []
     for d in data:
         new_dict = {}
@@ -55,6 +103,20 @@ def flatten_dict(data):
 def format_res_df(var_prefix: str, model: Any) -> pd.DataFrame:
     """
     Extract decision-variable results from a MIP model into a tidy DataFrame.
+
+    Parameters
+    ----------
+    var_prefix : str
+        Prefix of variable names to include (e.g., "beta_t", "z_d").
+    model : Any
+        Optimized model object with a `.vars` attribute iterable of variable objects
+        having `.name` and `.x` attributes.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with columns "key_0", "key_1", …, "key_n", and "value",
+        where each row corresponds to one decision variable.
     """
     records = []
 
@@ -63,9 +125,8 @@ def format_res_df(var_prefix: str, model: Any) -> pd.DataFrame:
         if not name_prefix.startswith(var_prefix):
             continue
 
-        # strip surrounding parentheses then re-add them so ast can parse
+        # Safely parse key_part into a tuple by rewrapping it in parentheses
         key_tuple = ast.literal_eval("(" + key_part.strip().strip("()") + ")")
-        # key_tuple is now a real Python tuple like (0, 1, 2)
 
         records.append(list(key_tuple) + [var.x])
 
@@ -77,16 +138,21 @@ def format_res_df(var_prefix: str, model: Any) -> pd.DataFrame:
     return pd.DataFrame(records, columns=columns)
 
 
-def process_results(model: Any, txt_dict: Dict[str, Any]) -> Dict[str, pd.DataFrame]:
+def process_results(model: Any) -> Dict[str, pd.DataFrame]:
     """
     Process model results into labeled DataFrames for triplet and duplet variables.
 
-    Args:
-        model: Optimized MIP model instance.
-        txt_dict: Dictionary for text representations (returned but not modified).
+    Parameters
+    ----------
+    model : Any
+        Optimized MIP model instance, with decision variables accessible via `.vars`.
 
-    Returns:
-        Dictionary with DataFrames: beta_t_res, beta_d_res, z_t_res, z_d_res.
+    Returns
+    -------
+    Dict[str, pd.DataFrame]
+        Dictionary containing four DataFrames:
+        - "beta_t_res", "beta_d_res": attribute-mix variables for triplets and duplets.
+        - "z_t_res", "z_d_res": slack variables for triplets and duplets.
     """
     # Slack variables (positive and negative) for triplets
     z_t_res = format_res_df("z_t", model)
@@ -156,11 +222,14 @@ def process_results(model: Any, txt_dict: Dict[str, Any]) -> Dict[str, pd.DataFr
 
 def save_results(results: Dict[str, Any], pkl_output_path: str) -> None:
     """
-    Save results dictionary to a pickle file.
+    Save a results dictionary to a pickle file.
 
-    Args:
-        results: Dictionary containing result DataFrames and other objects.
-        pkl_output_path: Path to write the pickle file.
+    Parameters
+    ----------
+    results : Dict[str, Any]
+        Dictionary containing result DataFrames and other serializable objects.
+    pkl_output_path : str
+        File path where the pickle file will be written.
     """
     with open(pkl_output_path, "wb") as f:
         pickle.dump(results, f)
