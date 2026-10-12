@@ -1,6 +1,7 @@
 
 # <img src="assets/carat_logo.png" alt="CarAT Logo" width="100" height="auto" style="vertical-align: middle;"> &mdash; Carbon Atom Tracker
 
+[![Paper](https://img.shields.io/badge/Green%20Chem.-10.1039%2FD5GC04348D-brightgreen.svg)](https://doi.org/10.1039/D5GC04348D)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16851777.svg)](https://doi.org/10.5281/zenodo.16851777)
 [![Run Tests](https://github.com/EmPajak21/carat/actions/workflows/run-tests.yml/badge.svg)](https://github.com/EmPajak21/carat/actions/workflows/run-tests.yml/badge.svg)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -125,7 +126,7 @@ This example demonstrates the complete workflow, including:
 - Solving the LP optimisation model.
 - Generating Sankey diagrams to visualise results.
 
-*Note: The linear programming formulation developed for CarAT is documented in `carat/core/linear_program.md`.*
+*Note: The linear programming formulation developed for CarAT is given in the [Linear Program Formulation](#linear-program-formulation) section above and described in full in the [paper](https://doi.org/10.1039/D5GC04348D).*
 
 [reference1]: https://www.tfs-initiative.com/app/uploads/2024/03/TfS_PCF_guidelines_2024_EN_pages-low.pdf "Together for Sustainability (TfS). (2024). Product Carbon Footprint (PCF) Guidelines. TfS Initiative."
 
@@ -134,9 +135,22 @@ This example demonstrates the complete workflow, including:
 
 ## 📝 Citation
 
-The corresponding manuscript for this repository is currently under preparation. In the interim, please cite this work as follows:
+The corresponding paper for this repository is published open access in *Green Chemistry*. If you use CarAT, please cite it as follows:
 
-*Pajak, E., Walz, D., Walz, O., Helleckes, L. M, Hellgardt, K. and del Rio Chanona, A. CarAT: Carbon Atom Tracing across Industrial Chemical Value Chains via Chemistry Language Models. (Manuscript in preparation)*
+*Pajak, E., Walz, D., Walz, O., Helleckes, L. M., Hellgardt, K. and del Rio Chanona, A. (2026). CarAT: carbon atom tracing across industrial chemical value chains via chemistry language models. Green Chemistry, 28(8), 3822&ndash;3836. [https://doi.org/10.1039/D5GC04348D](https://doi.org/10.1039/D5GC04348D)*
+
+```bibtex
+@article{pajak2026carat,
+  title   = {{CarAT}: carbon atom tracing across industrial chemical value chains via chemistry language models},
+  author  = {Pajak, Emma and Walz, David and Walz, Olga and Helleckes, Laura Marie and Hellgardt, Klaus and del Rio Chanona, Antonio},
+  journal = {Green Chemistry},
+  year    = {2026},
+  volume  = {28},
+  number  = {8},
+  pages   = {3822--3836},
+  doi     = {10.1039/D5GC04348D}
+}
+```
 
 ## ⚖️ License
 
